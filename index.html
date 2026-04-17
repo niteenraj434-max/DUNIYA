@@ -46,7 +46,7 @@
             height: 100dvh;
         }
         .min-h-dvh {
-            min-height: 100dvh;
+            height: 100dvh;
         }
         /* Hide scrollbar completely in sidebar but keep functionality */
         .no-scrollbar::-webkit-scrollbar {
@@ -118,7 +118,7 @@
                 <h1 class="font-semibold text-lg truncate px-4" id="mobile-chat-title">New Chat</h1>
                 <div class="w-6"></div> </header>
 
-            <div id="messages-container" class="flex-1 overflow-y-auto p-4 md:p-8 space-y-6 pb-32">
+            <div id="messages-container" class="flex-1 overflow-y-auto p-4 md:p-8 space-y-6 pb-40">
                 <div id="welcome-screen" class="h-full flex flex-col items-center justify-center text-center max-w-2xl mx-auto opacity-0 transition-opacity duration-500 hidden">
                     <div class="w-16 h-16 bg-blue-600 rounded-2xl flex items-center justify-center mb-6 shadow-lg shadow-blue-500/30">
                         <svg class="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path></svg>
@@ -128,8 +128,8 @@
                 </div>
             </div>
 
-            <div class="absolute bottom-0 w-full bg-gradient-to-t from-white via-white to-transparent dark:from-gray-800 dark:via-gray-800 pt-6 pb-4 px-4 md:px-8">
-                <div class="max-w-4xl mx-auto relative group flex items-end gap-2 bg-gray-100 dark:bg-gray-700 rounded-3xl p-2 pl-4 border border-transparent focus-within:border-blue-500 transition-colors shadow-sm">
+            <div class="absolute bottom-0 w-full bg-gradient-to-t from-white via-white/90 to-transparent dark:from-gray-800 dark:via-gray-800/90 pt-10 pb-6 px-4 md:px-8 pointer-events-none">
+                <div class="max-w-2xl mx-auto relative group flex items-end gap-2 bg-gray-100 dark:bg-gray-700 rounded-3xl p-2 pl-4 border border-gray-200 dark:border-gray-600 focus-within:border-blue-500 transition-all shadow-xl pointer-events-auto">
                     <textarea 
                         id="user-input" 
                         rows="1" 
@@ -141,16 +141,16 @@
                     <button 
                         id="send-btn" 
                         onclick="sendMessage()" 
-                        class="p-3 bg-blue-600 hover:bg-blue-700 text-white rounded-full flex-shrink-0 transition-all disabled:opacity-50 disabled:cursor-not-allowed h-12 w-12 flex items-center justify-center self-end mb-0.5"
+                        class="p-3 bg-blue-600 hover:bg-blue-700 text-white rounded-full flex-shrink-0 transition-all disabled:opacity-50 disabled:cursor-not-allowed h-12 w-12 flex items-center justify-center self-end mb-0.5 shadow-md"
                     >
                         <svg class="w-5 h-5 transform rotate-90" fill="currentColor" viewBox="0 0 20 20"><path d="M10.894 2.553a1 1 0 00-1.788 0l-7 14a1 1 0 001.169 1.409l5-1.429A1 1 0 009 15.571V11a1 1 0 112 0v4.571a1 1 0 00.725.962l5 1.428a1 1 0 001.17-1.408l-7-14z"></path></svg>
                     </button>
                 </div>
-                <div class="text-center text-xs text-gray-500 dark:text-gray-400 mt-3">
+                <div class="text-center text-[10px] text-gray-500 dark:text-gray-400 mt-3 uppercase tracking-widest font-medium">
                     AI can make mistakes. Verify important information.
                 </div>
             </div>
-        </main>
+            </main>
     </div>
 
     <div id="settings-modal" class="fixed inset-0 bg-black/60 z-[60] hidden flex items-center justify-center p-4 backdrop-blur-sm transition-opacity">
@@ -439,10 +439,11 @@
 
         function appendMessageToUI(role, content, isStreaming = false) {
             const div = document.createElement('div');
+            // Centering message width to match the new search bar width
             div.className = `flex w-full ${role === 'user' ? 'justify-end' : 'justify-start'} max-w-4xl mx-auto`;
             
             const innerClass = role === 'user' 
-                ? 'bg-blue-600 text-white rounded-3xl rounded-tr-sm px-5 py-3.5 max-w-[85%]' 
+                ? 'bg-blue-600 text-white rounded-3xl rounded-tr-sm px-5 py-3.5 max-w-[85%] shadow-sm' 
                 : 'bg-transparent text-gray-900 dark:text-gray-100 max-w-[100%] w-full prose prose-blue dark:prose-invert prose-p:leading-relaxed prose-pre:my-2';
 
             div.innerHTML = `
@@ -519,7 +520,7 @@
                 if (state.settings.systemPrompt) {
                     apiMessages.push({ role: 'system', content: state.settings.systemPrompt });
                 }
-                // Only send last 10 messages for context window safety on simple clone
+                // Only send last 10 messages for context window safety
                 const contextMessages = chat.messages.slice(-10);
                 apiMessages.push(...contextMessages);
 
@@ -530,8 +531,8 @@
                     headers: {
                         'Authorization': `Bearer ${state.settings.apiKey}`,
                         'Content-Type': 'application/json',
-                        'HTTP-Referer': window.location.href, // Required by OpenRouter
-                        'X-Title': 'Universal AI Chat' // Required by OpenRouter
+                        'HTTP-Referer': window.location.href,
+                        'X-Title': 'Universal AI Chat'
                     },
                     body: JSON.stringify({
                         model: state.settings.model,
@@ -575,7 +576,7 @@
                             const streamEl = document.getElementById('streaming-message');
                             if (streamEl) {
                                 const contentContainer = streamEl.querySelector('.message-content');
-                                contentContainer.innerHTML = marked.parse(aiResponseText + '▋'); // Blinking cursor effect
+                                contentContainer.innerHTML = marked.parse(aiResponseText + '▋');
                                 scrollToBottom();
                             }
                         } catch (e) {
