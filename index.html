@@ -27,13 +27,12 @@
     </script>
 
     <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
-
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css">
     <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js"></script>
     <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/contrib/auto-render.min.js"></script>
 
     <style>
-        /* Custom scrollbar for webkit */
+        /* Custom scrollbar */
         ::-webkit-scrollbar { width: 6px; height: 6px; }
         ::-webkit-scrollbar-track { background: transparent; }
         ::-webkit-scrollbar-thumb { background-color: rgba(156, 163, 175, 0.5); border-radius: 10px; }
@@ -41,41 +40,47 @@
         .no-scrollbar::-webkit-scrollbar { display: none; }
         .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
 
-        /* Holographic Animated Backgrounds */
-        @keyframes holo-shift {
-            0% { background-position: 0% 50%; }
-            50% { background-position: 100% 50%; }
-            100% { background-position: 0% 50%; }
-        }
-
-        /* Light Mode Holographic */
+        /* Aesthetic Background mimicking the Copilot visual */
         body {
-            background: linear-gradient(-45deg, #f1f5f9, #e2e8f0, #e0c3fc, #c3ddfc);
-            background-size: 400% 400%;
-            animation: holo-shift 15s ease infinite;
+            background-image: url('https://images.unsplash.com/photo-1508610048659-a06b669e3321?q=80&w=2070&auto=format&fit=crop');
+            background-size: cover;
+            background-position: center;
+            background-attachment: fixed;
+            transition: background-color 0.5s ease;
         }
 
-        /* Dark Mode Holographic */
-        html.dark body {
-            background: linear-gradient(-45deg, #0f172a, #1e1b4b, #09090b, #172554);
-            background-size: 400% 400%;
-            animation: holo-shift 15s ease infinite;
+        /* Dark Mode Overlay */
+        html.dark body::before {
+            content: '';
+            position: fixed;
+            inset: 0;
+            background: rgba(15, 23, 42, 0.6);
+            backdrop-filter: blur(2px);
+            z-index: -1;
+        }
+
+        html:not(.dark) body::before {
+            content: '';
+            position: fixed;
+            inset: 0;
+            background: rgba(255, 255, 255, 0.2);
+            z-index: -1;
         }
 
         /* Glassmorphism Classes */
         .glass-panel {
-            background: rgba(255, 255, 255, 0.4);
-            backdrop-filter: blur(16px);
-            -webkit-backdrop-filter: blur(16px);
-            border: 1px solid rgba(255, 255, 255, 0.5);
+            background: rgba(255, 255, 255, 0.6);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.6);
         }
         
         html.dark .glass-panel {
-            background: rgba(15, 23, 42, 0.4);
-            backdrop-filter: blur(16px);
-            -webkit-backdrop-filter: blur(16px);
-            border: 1px solid rgba(255, 255, 255, 0.08);
-            box-shadow: 0 4px 30px rgba(0, 0, 0, 0.3);
+            background: rgba(15, 23, 42, 0.65);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            box-shadow: 0 4px 30px rgba(0, 0, 0, 0.4);
         }
 
         /* Copilot-style Chat Bubbles */
@@ -90,13 +95,12 @@
             color: #e2e8f0;
         }
 
-        /* Tables formatting for Truth Tables */
+        /* Tables & Code Blocks */
         .message-content table { width: 100%; border-collapse: collapse; margin: 1.5rem 0; font-size: 0.9em; background: rgba(255,255,255,0.05); border-radius: 8px; overflow: hidden;}
         .message-content th, .message-content td { padding: 12px 15px; border: 1px solid rgba(156, 163, 175, 0.2); }
         .message-content thead tr { background-color: rgba(37, 99, 235, 0.1); text-align: left; }
         html.dark .message-content thead tr { background-color: rgba(59, 130, 246, 0.2); color: white !important;}
 
-        /* Code Blocks */
         pre {
             background-color: rgba(15, 23, 42, 0.8) !important;
             border-radius: 0.75rem;
@@ -106,6 +110,21 @@
         
         .katex-display { overflow-x: auto; overflow-y: hidden; padding: 0.5em 0; }
         .dark .katex { color: #f8fafc; }
+
+        /* Specific Pill Styling for Hub */
+        .action-pill {
+            background: rgba(255, 255, 255, 0.5);
+            border: 1px solid rgba(255, 255, 255, 0.8);
+            color: #1f2937;
+            transition: all 0.2s ease;
+        }
+        html.dark .action-pill {
+            background: rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.15);
+            color: #f3f4f6;
+        }
+        .action-pill:hover { background: rgba(255, 255, 255, 0.8); transform: translateY(-1px); }
+        html.dark .action-pill:hover { background: rgba(255, 255, 255, 0.2); }
     </style>
 </head>
 <body class="text-gray-900 dark:text-gray-100 overflow-hidden font-sans transition-colors duration-500">
@@ -123,9 +142,9 @@
 
         <div id="sidebar-overlay" class="fixed inset-0 bg-black/40 backdrop-blur-sm z-40 hidden md:hidden transition-opacity" onclick="toggleSidebar()"></div>
 
-        <aside id="sidebar" class="glass-panel fixed md:relative inset-y-0 left-0 z-50 w-72 transform -translate-x-full md:translate-x-0 transition-transform duration-300 ease-in-out flex flex-col h-full border-r border-white/20 dark:border-white/10">
+        <aside id="sidebar" class="glass-panel fixed md:relative inset-y-0 left-0 z-50 w-72 transform -translate-x-full md:translate-x-0 transition-transform duration-300 ease-in-out flex flex-col h-full border-r border-white/40 dark:border-white/10 m-0 md:m-2 md:rounded-2xl shadow-xl">
             <div class="p-4 flex items-center justify-between">
-                <button onclick="createNewChat()" class="flex-1 glass-panel hover:bg-white/50 dark:hover:bg-gray-800/50 rounded-xl p-3 flex items-center gap-2 transition-colors font-medium text-sm shadow-sm">
+                <button onclick="createNewChat()" class="flex-1 glass-panel hover:bg-white/80 dark:hover:bg-gray-800/80 rounded-xl p-3 flex items-center gap-2 transition-colors font-medium text-sm shadow-sm">
                     <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path></svg>
                     New Chat
                 </button>
@@ -136,65 +155,143 @@
 
             <div id="chat-list" class="flex-1 overflow-y-auto no-scrollbar p-3 space-y-1"></div>
 
-            <div class="p-4 space-y-2 border-t border-white/20 dark:border-white/10">
-                <button onclick="toggleDarkMode()" class="w-full flex items-center gap-3 p-3 rounded-xl hover:bg-white/40 dark:hover:bg-gray-800/40 transition-colors text-sm font-medium">
+            <div class="p-4 space-y-2 border-t border-white/40 dark:border-white/10">
+                <button onclick="toggleDarkMode()" class="w-full flex items-center gap-3 p-3 rounded-xl hover:bg-white/60 dark:hover:bg-gray-800/60 transition-colors text-sm font-medium">
                     <svg id="theme-icon" class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z"></path></svg>
                     <span id="theme-text">Toggle Theme</span>
                 </button>
-                <button onclick="openSettings()" class="w-full flex items-center gap-3 p-3 rounded-xl hover:bg-white/40 dark:hover:bg-gray-800/40 transition-colors text-sm font-medium">
+                <button onclick="openSettings()" class="w-full flex items-center gap-3 p-3 rounded-xl hover:bg-white/60 dark:hover:bg-gray-800/60 transition-colors text-sm font-medium">
                     <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path></svg>
                     Settings
                 </button>
             </div>
         </aside>
 
-        <main class="flex-1 flex flex-col h-screen min-w-0 relative bg-transparent">
-            <header class="md:hidden glass-panel flex items-center justify-between p-4 shrink-0 z-10">
-                <button onclick="toggleSidebar()" class="p-2 -ml-2 text-gray-600 dark:text-gray-300 focus:outline-none">
+        <main class="flex-1 flex flex-col h-screen min-w-0 relative bg-transparent z-10">
+            <header class="md:hidden glass-panel flex items-center justify-between p-4 shrink-0 z-20 m-2 rounded-xl">
+                <button onclick="toggleSidebar()" class="p-2 -ml-2 focus:outline-none">
                     <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"></path></svg>
                 </button>
                 <h1 class="font-semibold text-lg truncate px-4" id="mobile-chat-title">New Chat</h1>
                 <div class="w-6"></div> 
             </header>
 
-            <div id="messages-container" class="flex-1 overflow-y-auto p-4 md:p-8 space-y-8 pb-48">
-                <div id="welcome-screen" class="h-full flex flex-col items-center justify-center text-center max-w-2xl mx-auto opacity-0 transition-opacity duration-500 hidden">
-                    <div class="w-20 h-20 glass-panel rounded-3xl flex items-center justify-center mb-6 shadow-2xl">
-                        <svg class="w-10 h-10 text-blue-600 dark:text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path></svg>
+            <div id="hub-view" class="absolute inset-0 flex flex-col items-center justify-center p-4 overflow-y-auto hidden z-10">
+                <h2 class="text-3xl md:text-4xl font-bold mb-8 text-gray-800 dark:text-gray-100 drop-shadow-md text-center">Hi there. What should we dive into today?</h2>
+                
+                <div id="hub-input-slot" class="w-full max-w-3xl mb-6 shadow-2xl rounded-[2rem]"></div>
+
+                <div class="flex flex-wrap justify-center gap-3 mb-10 max-w-3xl">
+                    <button class="action-pill px-5 py-2 rounded-full text-sm font-medium">Create an image</button>
+                    <button class="action-pill px-5 py-2 rounded-full text-sm font-medium">Find the best deal</button>
+                    <button class="action-pill px-5 py-2 rounded-full text-sm font-medium">Predict the future</button>
+                    <button class="action-pill px-5 py-2 rounded-full text-sm font-medium">Take a quiz</button>
+                    <button class="action-pill px-5 py-2 rounded-full text-sm font-medium">Improve writing</button>
+                    <button class="action-pill px-5 py-2 rounded-full text-sm font-medium">Brainstorm ideas</button>
+                </div>
+
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4 w-full max-w-3xl">
+                    <div class="glass-panel p-5 rounded-3xl">
+                        <div class="flex items-center text-sm font-semibold mb-4 text-gray-700 dark:text-gray-200">
+                            <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.172 7l-6.586 6.586a2 2 0 102.828 2.828l6.414-6.586a4 4 0 00-5.656-5.656l-6.415 6.585a6 6 0 108.486 8.486L20.5 13"></path></svg>
+                            Attach a recent file to chat
+                        </div>
+                        <div class="space-y-3">
+                            <div class="flex items-center gap-3 p-2 hover:bg-white/30 dark:hover:bg-gray-800/30 rounded-lg cursor-pointer transition">
+                                <div class="p-2 bg-blue-100 dark:bg-blue-900/50 rounded text-blue-600 dark:text-blue-300">
+                                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path></svg>
+                                </div>
+                                <div>
+                                    <p class="text-sm font-medium">Stack_Case_Study.pdf</p>
+                                    <p class="text-xs text-gray-500 dark:text-gray-400">Today</p>
+                                </div>
+                            </div>
+                            <div class="flex items-center gap-3 p-2 hover:bg-white/30 dark:hover:bg-gray-800/30 rounded-lg cursor-pointer transition">
+                                <div class="p-2 bg-red-100 dark:bg-red-900/50 rounded text-red-600 dark:text-red-300">
+                                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path></svg>
+                                </div>
+                                <div>
+                                    <p class="text-sm font-medium">Datesheet_Class.pdf</p>
+                                    <p class="text-xs text-gray-500 dark:text-gray-400">Yesterday</p>
+                                </div>
+                            </div>
+                        </div>
                     </div>
-                    <h2 class="text-3xl md:text-5xl font-bold mb-4 bg-clip-text text-transparent bg-gradient-to-r from-blue-600 to-purple-600 dark:from-blue-400 dark:to-purple-400">How can I help you?</h2>
-                    <p class="text-gray-600 dark:text-gray-300 text-lg">Send a message to start a conversation.</p>
+
+                    <div class="glass-panel p-5 rounded-3xl">
+                        <div class="flex items-center text-sm font-semibold mb-4 text-gray-700 dark:text-gray-200">
+                            <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"></path></svg>
+                            Keep talking to AI
+                        </div>
+                        <div class="space-y-3">
+                            <div class="flex items-center gap-3 p-2 hover:bg-white/30 dark:hover:bg-gray-800/30 rounded-lg cursor-pointer transition">
+                                <div class="p-2 bg-gray-200 dark:bg-gray-700 rounded-full">
+                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 10h.01M12 10h.01M16 10h.01M9 16H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-5l-5 5v-5z"></path></svg>
+                                </div>
+                                <div class="flex-1 truncate">
+                                    <p class="text-sm font-medium truncate">Barber Paradox and Cantor's...</p>
+                                    <p class="text-xs text-gray-500 dark:text-gray-400">Last Saturday</p>
+                                </div>
+                            </div>
+                            <div class="flex items-center gap-3 p-2 hover:bg-white/30 dark:hover:bg-gray-800/30 rounded-lg cursor-pointer transition">
+                                <div class="p-2 bg-gray-200 dark:bg-gray-700 rounded-full">
+                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 10h.01M12 10h.01M16 10h.01M9 16H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-5l-5 5v-5z"></path></svg>
+                                </div>
+                                <div class="flex-1 truncate">
+                                    <p class="text-sm font-medium truncate">Seeking Advice on a Difficult...</p>
+                                    <p class="text-xs text-gray-500 dark:text-gray-400">Thursday, Nov 6</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
                 </div>
             </div>
 
-            <div class="absolute bottom-0 w-full pt-10 pb-8 px-4 md:px-8 bg-gradient-to-t from-white/80 via-white/50 dark:from-gray-900/90 dark:via-gray-900/50 to-transparent pointer-events-none z-20">
-                <div class="max-w-3xl mx-auto relative flex items-end gap-2 glass-panel rounded-2xl p-2 pl-4 focus-within:ring-2 focus-within:ring-blue-500/50 transition-all shadow-2xl pointer-events-auto">
-                    <textarea 
-                        id="user-input" 
-                        rows="1" 
-                        placeholder="Ask anything..." 
-                        class="w-full bg-transparent border-none focus:ring-0 resize-none py-3 max-h-32 text-gray-900 dark:text-gray-100 text-base outline-none placeholder-gray-500 dark:placeholder-gray-400 font-medium"
-                        oninput="this.style.height = 'auto'; this.style.height = (this.scrollHeight) + 'px';"
-                        onkeydown="handleEnter(event)"
-                    ></textarea>
+            <div id="messages-container" class="flex-1 overflow-y-auto p-4 md:p-8 space-y-8 pb-48 z-10 hidden">
+                </div>
+
+            <div id="chat-input-slot" class="absolute bottom-0 w-full pt-10 pb-8 px-4 md:px-8 bg-gradient-to-t from-white/90 via-white/50 dark:from-gray-900/90 dark:via-gray-900/50 to-transparent z-20 hidden pointer-events-none">
+                </div>
+
+            <div id="main-input-block" class="w-full relative flex items-center gap-2 glass-panel rounded-[2rem] p-2 pl-4 focus-within:ring-2 focus-within:ring-blue-500/50 transition-all pointer-events-auto bg-white dark:bg-[#1a202c]">
+                <button class="p-2 text-gray-500 hover:text-blue-500 transition-colors bg-gray-100 dark:bg-gray-800 rounded-full flex-shrink-0">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path></svg>
+                </button>
+                <textarea 
+                    id="user-input" 
+                    rows="1" 
+                    placeholder="Ask anything..." 
+                    class="w-full bg-transparent border-none focus:ring-0 resize-none py-3 max-h-32 text-gray-900 dark:text-gray-100 text-base outline-none placeholder-gray-500 dark:placeholder-gray-400 font-medium"
+                    oninput="this.style.height = 'auto'; this.style.height = (this.scrollHeight) + 'px';"
+                    onkeydown="handleEnter(event)"
+                ></textarea>
+                <div class="flex items-center gap-1 pr-2">
+                    <button class="p-2 text-gray-500 hover:text-blue-500 transition-colors hidden sm:block">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 13a3 3 0 11-6 0 3 3 0 016 0z"></path></svg>
+                    </button>
+                    <button class="p-2 text-gray-500 hover:text-blue-500 transition-colors">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11a7 7 0 01-7 7m0 0a7 7 0 01-7-7m7 7v4m0 0H8m4 0h4m-4-8a3 3 0 01-3-3V5a3 3 0 116 0v6a3 3 0 01-3 3z"></path></svg>
+                    </button>
                     <button 
                         id="send-btn" 
                         onclick="sendMessage()" 
-                        class="p-2 bg-blue-600 hover:bg-blue-700 text-white rounded-xl flex-shrink-0 transition-all disabled:opacity-50 disabled:cursor-not-allowed h-10 w-10 flex items-center justify-center self-end mb-1 shadow-lg"
+                        class="p-2 bg-blue-600 hover:bg-blue-700 text-white rounded-full flex-shrink-0 transition-all disabled:opacity-50 disabled:cursor-not-allowed h-10 w-10 flex items-center justify-center shadow-lg ml-1"
                     >
-                        <svg class="w-5 h-5 transform rotate-90 translate-x-0.5" fill="currentColor" viewBox="0 0 20 20"><path d="M10.894 2.553a1 1 0 00-1.788 0l-7 14a1 1 0 001.169 1.409l5-1.429A1 1 0 009 15.571V11a1 1 0 112 0v4.571a1 1 0 00.725.962l5 1.428a1 1 0 001.17-1.408l-7-14z"></path></svg>
+                        <svg class="w-4 h-4 transform rotate-90 translate-x-0.5" fill="currentColor" viewBox="0 0 20 20"><path d="M10.894 2.553a1 1 0 00-1.788 0l-7 14a1 1 0 001.169 1.409l5-1.429A1 1 0 009 15.571V11a1 1 0 112 0v4.571a1 1 0 00.725.962l5 1.428a1 1 0 001.17-1.408l-7-14z"></path></svg>
                     </button>
                 </div>
-                <div class="text-center text-[11px] text-gray-500 dark:text-gray-400 mt-4 font-medium tracking-wide pointer-events-auto">
-                    AI can make mistakes. Verify important information.
-                </div>
             </div>
+
+            <div id="disclaimer" class="absolute bottom-2 w-full text-center text-[11px] text-gray-600 dark:text-gray-300 font-medium tracking-wide pointer-events-auto z-20 hidden">
+                AI can make mistakes. Verify important information.
+            </div>
+            
         </main>
     </div>
 
     <div id="settings-modal" class="fixed inset-0 bg-black/40 backdrop-blur-sm z-[60] hidden flex items-center justify-center p-4 transition-opacity">
-        <div class="glass-panel rounded-2xl w-full max-w-lg shadow-2xl overflow-hidden flex flex-col max-h-[90dvh]">
-            <div class="p-6 border-b border-white/20 dark:border-white/10 flex justify-between items-center">
+        <div class="glass-panel rounded-2xl w-full max-w-lg shadow-2xl overflow-hidden flex flex-col max-h-[90dvh] bg-white dark:bg-gray-900">
+            <div class="p-6 border-b border-gray-200 dark:border-white/10 flex justify-between items-center">
                 <h2 class="text-xl font-bold">Settings</h2>
                 <button onclick="closeSettings()" class="text-gray-500 hover:text-gray-900 dark:hover:text-white">
                     <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
@@ -203,19 +300,19 @@
             <div class="p-6 space-y-5 overflow-y-auto">
                 <div>
                     <label class="block text-sm font-medium mb-2">OpenRouter API Key <span class="text-blue-500">*</span></label>
-                    <input type="password" id="api-key" placeholder="sk-or-v1-..." class="w-full p-3 bg-white/50 dark:bg-black/20 border border-white/30 dark:border-white/10 rounded-xl outline-none focus:ring-2 focus:ring-blue-500 font-mono text-sm backdrop-blur-sm">
+                    <input type="password" id="api-key" placeholder="sk-or-v1-..." class="w-full p-3 bg-white dark:bg-black/20 border border-gray-300 dark:border-white/10 rounded-xl outline-none focus:ring-2 focus:ring-blue-500 font-mono text-sm">
                 </div>
                 <div>
                     <label class="block text-sm font-medium mb-2">Model Name</label>
-                    <input type="text" id="model-name" placeholder="deepseek/deepseek-r1:free" class="w-full p-3 bg-white/50 dark:bg-black/20 border border-white/30 dark:border-white/10 rounded-xl outline-none focus:ring-2 focus:ring-blue-500 font-mono text-sm backdrop-blur-sm">
+                    <input type="text" id="model-name" placeholder="deepseek/deepseek-r1:free" class="w-full p-3 bg-white dark:bg-black/20 border border-gray-300 dark:border-white/10 rounded-xl outline-none focus:ring-2 focus:ring-blue-500 font-mono text-sm">
                 </div>
                 <div>
                     <label class="block text-sm font-medium mb-2">System Prompt</label>
-                    <textarea id="system-prompt" rows="3" class="w-full p-3 bg-white/50 dark:bg-black/20 border border-white/30 dark:border-white/10 rounded-xl outline-none focus:ring-2 focus:ring-blue-500 text-sm resize-none backdrop-blur-sm"></textarea>
+                    <textarea id="system-prompt" rows="3" class="w-full p-3 bg-white dark:bg-black/20 border border-gray-300 dark:border-white/10 rounded-xl outline-none focus:ring-2 focus:ring-blue-500 text-sm resize-none"></textarea>
                 </div>
             </div>
-            <div class="p-6 border-t border-white/20 dark:border-white/10 flex justify-end gap-3">
-                <button onclick="closeSettings()" class="px-5 py-2.5 rounded-xl text-sm font-medium hover:bg-white/40 dark:hover:bg-gray-800/40 transition-colors">Cancel</button>
+            <div class="p-6 border-t border-gray-200 dark:border-white/10 flex justify-end gap-3">
+                <button onclick="closeSettings()" class="px-5 py-2.5 rounded-xl text-sm font-medium hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors">Cancel</button>
                 <button onclick="saveSettings()" class="px-5 py-2.5 rounded-xl text-sm font-medium bg-blue-600 hover:bg-blue-700 text-white shadow-lg transition-colors">Save</button>
             </div>
         </div>
@@ -247,7 +344,14 @@
             chatList: document.getElementById('chat-list'),
             messagesContainer: document.getElementById('messages-container'),
             sendBtn: document.getElementById('send-btn'),
-            welcomeScreen: document.getElementById('welcome-screen'),
+            
+            // New Layout Elements
+            hubView: document.getElementById('hub-view'),
+            hubInputSlot: document.getElementById('hub-input-slot'),
+            chatInputSlot: document.getElementById('chat-input-slot'),
+            mainInputBlock: document.getElementById('main-input-block'),
+            disclaimer: document.getElementById('disclaimer'),
+            
             settingsModal: document.getElementById('settings-modal'),
             apiKeyInput: document.getElementById('api-key'),
             modelNameInput: document.getElementById('model-name'),
@@ -370,18 +474,6 @@
             }
         }
 
-        function renameChat(id, event) {
-            event.stopPropagation();
-            const chat = state.chats.find(c => c.id === id);
-            const newTitle = prompt("Enter new chat title:", chat.title);
-            if (newTitle && newTitle.trim() !== "") {
-                chat.title = newTitle.trim();
-                saveState();
-                renderChatList();
-                if(state.currentChatId === id) els.mobileChatTitle.innerText = chat.title;
-            }
-        }
-
         function renderMathInElementSafely(element) {
             if (typeof renderMathInElement === 'function') {
                 renderMathInElement(element, {
@@ -401,7 +493,7 @@
             state.chats.forEach(chat => {
                 const isActive = chat.id === state.currentChatId;
                 const div = document.createElement('div');
-                div.className = `group flex items-center justify-between p-3 rounded-xl cursor-pointer transition-colors ${isActive ? 'bg-blue-500/20 text-blue-600 dark:text-blue-400 font-medium border border-blue-500/30' : 'hover:bg-white/40 dark:hover:bg-gray-800/40'}`;
+                div.className = `group flex items-center justify-between p-3 rounded-xl cursor-pointer transition-colors ${isActive ? 'bg-white/40 dark:bg-black/20 font-medium border border-white/30 dark:border-white/10' : 'hover:bg-white/20 dark:hover:bg-gray-800/40'}`;
                 div.onclick = () => switchChat(chat.id);
                 div.innerHTML = `
                     <div class="flex items-center gap-3 overflow-hidden flex-1">
@@ -422,13 +514,26 @@
             els.mobileChatTitle.innerText = chat ? chat.title : 'New Chat';
 
             if (!chat || chat.messages.length === 0) {
-                els.welcomeScreen.classList.remove('hidden');
-                setTimeout(() => els.welcomeScreen.classList.remove('opacity-0'), 50);
+                // Show Hub Layout, move input to center
+                els.hubView.classList.remove('hidden');
+                els.messagesContainer.classList.add('hidden');
+                els.chatInputSlot.classList.add('hidden');
+                els.disclaimer.classList.add('hidden');
+                
+                els.hubInputSlot.appendChild(els.mainInputBlock);
+                els.mainInputBlock.classList.add('max-w-3xl', 'mx-auto');
                 return;
             }
 
-            els.welcomeScreen.classList.add('hidden');
-            els.welcomeScreen.classList.add('opacity-0');
+            // Show Chat Layout, move input to bottom
+            els.hubView.classList.add('hidden');
+            els.messagesContainer.classList.remove('hidden');
+            els.chatInputSlot.classList.remove('hidden');
+            els.disclaimer.classList.remove('hidden');
+
+            els.chatInputSlot.appendChild(els.mainInputBlock);
+            els.mainInputBlock.classList.remove('max-w-3xl', 'mx-auto');
+            els.mainInputBlock.classList.add('max-w-4xl', 'mx-auto');
 
             chat.messages.forEach(msg => appendMessageToUI(msg.role, msg.content, false));
             scrollToBottom();
@@ -438,19 +543,18 @@
             const div = document.createElement('div');
             div.className = `flex w-full ${role === 'user' ? 'justify-end' : 'justify-start'} max-w-4xl mx-auto`;
 
-            // THIS IS THE CRITICAL FIX: Added 'dark:prose-invert' back in!
             const innerClass = role === 'user' 
-                ? 'user-bubble text-white rounded-3xl rounded-tr-sm px-5 py-3 max-w-[85%]' 
+                ? 'user-bubble text-white rounded-[2rem] rounded-tr-sm px-6 py-4 max-w-[85%]' 
                 : 'ai-bubble max-w-[100%] w-full prose dark:prose-invert prose-p:leading-relaxed prose-pre:my-2';
 
             div.innerHTML = `
                 <div class="${role === 'user' ? '' : 'flex gap-4 w-full'}">
                     ${role === 'assistant' ? `
-                        <div class="w-8 h-8 rounded-xl bg-blue-600/10 border border-blue-500/20 flex-shrink-0 flex items-center justify-center mt-1">
+                        <div class="w-8 h-8 rounded-full bg-white dark:bg-gray-800 shadow-sm flex-shrink-0 flex items-center justify-center mt-1 border border-gray-200 dark:border-gray-700">
                             <svg class="w-5 h-5 text-blue-600 dark:text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path></svg>
                         </div>
                     ` : ''}
-                    <div class="${innerClass} ${role === 'assistant' ? 'flex-1 min-w-0' : ''} message-content">
+                    <div class="${innerClass} ${role === 'assistant' ? 'flex-1 min-w-0 glass-panel p-6 rounded-[2rem] rounded-tl-sm' : ''} message-content">
                         ${role === 'user' ? escapeHTML(content) : marked.parse(content || ' ')}
                     </div>
                 </div>
@@ -493,13 +597,14 @@
             chat.messages.push({ role: 'user', content: text });
             els.textarea.value = '';
             els.textarea.style.height = 'auto';
-            els.welcomeScreen.classList.add('hidden');
-            appendMessageToUI('user', text);
+            
+            // Re-render chat layout to move input to the bottom instantly
+            renderCurrentChat();
             saveState();
 
             isGenerating = true;
             els.sendBtn.disabled = true;
-            els.sendBtn.innerHTML = `<svg class="animate-spin w-5 h-5" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg>`;
+            els.sendBtn.innerHTML = `<svg class="animate-spin w-4 h-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg>`;
 
             appendMessageToUI('assistant', '<span class="animate-pulse text-blue-500">Thinking...</span>', true);
 
@@ -578,7 +683,7 @@
             } finally {
                 isGenerating = false;
                 els.sendBtn.disabled = false;
-                els.sendBtn.innerHTML = `<svg class="w-5 h-5 transform rotate-90 translate-x-0.5" fill="currentColor" viewBox="0 0 20 20"><path d="M10.894 2.553a1 1 0 00-1.788 0l-7 14a1 1 0 001.169 1.409l5-1.429A1 1 0 009 15.571V11a1 1 0 112 0v4.571a1 1 0 00.725.962l5 1.428a1 1 0 001.17-1.408l-7-14z"></path></svg>`;
+                els.sendBtn.innerHTML = `<svg class="w-4 h-4 transform rotate-90 translate-x-0.5" fill="currentColor" viewBox="0 0 20 20"><path d="M10.894 2.553a1 1 0 00-1.788 0l-7 14a1 1 0 001.169 1.409l5-1.429A1 1 0 009 15.571V11a1 1 0 112 0v4.571a1 1 0 00.725.962l5 1.428a1 1 0 001.17-1.408l-7-14z"></path></svg>`;
                 scrollToBottom();
                 if (window.innerWidth > 768) els.textarea.focus();
             }
